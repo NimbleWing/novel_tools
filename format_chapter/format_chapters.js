@@ -96,7 +96,7 @@ function formatChapterFile(inputPath, outputPath) {
         const chapterStr = String(chapterNum).padStart(4, '0');
         const newTitle = `第${partStr}${chapterStr}章 ${chapterContent}`;
 
-        output.push(`【${newTitle}】`);
+        output.push(`${newTitle}`);
     }
 
     fs.writeFileSync(outputPath, output.join('\n'), 'utf-8');
