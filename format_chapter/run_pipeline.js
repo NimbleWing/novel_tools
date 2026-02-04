@@ -9,7 +9,8 @@ const SCRIPTS = {
     format: 'node format_chapters.js',
     compare: 'node compare_chapters.js',
     generateMap: 'node generate_chapters_map.js',
-    update: 'node update_chapters.js'
+    update: 'node update_chapters.js',
+    removeMeaningless: 'node remove_meaningless_lines.js'
 };
 // =============================
 
@@ -93,10 +94,11 @@ async function main() {
     if (answer === '1') {
         console.log('\n继续执行后续步骤...\n');
 
-        // 步骤 5-6: 继续执行
+        // 步骤 5-7: 继续执行
         const finalSteps = [
             { name: '生成章节映射', command: SCRIPTS.generateMap, desc: '生成 JSON 映射 temp/chapters_map.json' },
-            { name: '更新原始小说', command: SCRIPTS.update, desc: '根据映射更新小说 temp/updated_novel.txt' }
+            { name: '更新原始小说', command: SCRIPTS.update, desc: '根据映射更新小说 temp/updated_novel.txt' },
+            { name: '删除无意义行', command: SCRIPTS.removeMeaningless, desc: '删除空白行和指定无效内容 temp/final_novel.txt' }
         ];
 
         for (const step of finalSteps) {
@@ -120,6 +122,7 @@ async function main() {
         console.log('  - temp/diff_chapters.txt     (差异报告)');
         console.log('  - temp/chapters_map.json    (章节映射)');
         console.log('  - temp/updated_novel.txt    (更新后的小说)');
+        console.log('  - temp/final_novel.txt      (最终小说)');
         console.log('');
     } else {
         console.log('\n已退出 Pipeline');
