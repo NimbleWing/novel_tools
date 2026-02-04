@@ -40,10 +40,26 @@ function cn2num(cn) {
     return result + current;
 }
 
+function extractChapterNum(title) {
+    const match = title.match(/第(.+?)章/);
+    if (match) {
+        return cn2num(match[1]);
+    }
+    return null;
+}
+
+function extractChapterContent(title) {
+    const content = title.replace(/第.+?章[、：：\s]*/, '').trim('、： ');
+    return content;
+}
+
 function formatChapterFile(inputPath, outputPath) {
     const content = fs.readFileSync(inputPath, 'utf-8');
     const lines = content.split('\n');
     const output = [];
+
+    let currentPart = 0;
+    let lastChapterNum = 0;
 
     for (const line of lines) {
         if (!line.trim()) {
@@ -52,23 +68,35 @@ function formatChapterFile(inputPath, outputPath) {
         }
 
         const match = line.match(/【([^】]+)】/);
-        if (match && match[1].includes('第') && match[1].includes('章')) {
-            const title = match[1];
-            const numMatch = title.match(/第(.+?)章/);
-
-            if (numMatch) {
-                const chapterNum = cn2num(numMatch[1]);
-                const content = title.replace(/第.+?章[、：：\s]*/, '').trim('、： ');
-                const newTitle = `第${String(chapterNum).padStart(5, '0')}章 ${content}`;
-                output.push(`【${newTitle}】`);
-            } else {
-                output.push(line);
-            }
-        } else if (match) {
-            output.push(match[1]);
-        } else {
+        if (!match) {
             output.push(line);
+            continue;
         }
+
+        const title = match[1];
+
+        if (!title.includes('第') || !title.includes('章')) {
+            output.push(title);
+            continue;
+        }
+
+        const chapterNum = extractChapterNum(title);
+        if (chapterNum === null) {
+            output.push(line);
+            continue;
+        }
+
+        if (chapterNum === 1 || chapterNum < lastChapterNum) {
+            currentPart++;
+        }
+        lastChapterNum = chapterNum;
+
+        const chapterContent = extractChapterContent(title);
+        const partStr = String(currentPart).padStart(2, '0');
+        const chapterStr = String(chapterNum).padStart(4, '0');
+        const newTitle = `第${partStr}${chapterStr}章 ${chapterContent}`;
+
+        output.push(`【${newTitle}】`);
     }
 
     fs.writeFileSync(outputPath, output.join('\n'), 'utf-8');
